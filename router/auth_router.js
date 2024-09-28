@@ -3,7 +3,7 @@ const router = express.Router()
 
 const {userSignIn, userSignUp} = require('../controller/auth_handler')
 
-router.route('/signup').post(userSignUp)
 router.route('/signin').get(userSignIn)
+router.route('/signup').post(userSignUp)
 
 module.exports = router

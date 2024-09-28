@@ -7,9 +7,12 @@ const pg_conn = postgres(db_url);
 (async () => {
     try {
       await pg_conn `SELECT 1`;
-      console.log('Database connection is active.');
+      console.log('Postgres Database connection is active.');
+    //   logger.info('Postgres Database connection successful and is active.')
+      
     } catch (error) {
-      console.error('Database connection failed:', error);
+      console.error(`Postgres Database connection failed ${error}`)
+    //   logger.error(`Postgres Database connection failed ${error}`)
     }
 })();
 
