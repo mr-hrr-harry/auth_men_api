@@ -1,8 +1,8 @@
 const postgres = require('postgres')
 require('dotenv').config({path: 'database/potsgres/pgdb.env'})
 
-db_url = process.env.POSTGRES_URL
-const pg_conn = postgres(db_url);
+pg_db_url = process.env.POSTGRES_URL
+const pg_conn = postgres(pg_db_url);
 
 (async () => {
     try {
