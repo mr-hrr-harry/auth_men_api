@@ -1,9 +1,8 @@
 const pg_conn = require('../database/potsgres/postgres_auth')
 const {randomInt} = require('crypto')
 
-
 // request GET
-// retrieve user id 
+// retrieve user id
 const userSignIn = async (req, res) => {
     server_response = {}
     if(pg_conn){
@@ -19,7 +18,7 @@ const userSignIn = async (req, res) => {
             // logger.error("DB connection failed, unable to fulfill user request")
             return res.json(server_response)
         }
-
+        
         if(data[0]){
             server_response["status_code"] = 200
             server_response["message"] = "Authentication successful"

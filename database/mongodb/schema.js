@@ -5,7 +5,7 @@ const review_schema = mongoose.Schema({
         type: String,
         required: true,
     },
-    movie_name:{
+    movie_id:{
         type: String,
         required: true,
     },
@@ -24,6 +24,5 @@ const review_schema = mongoose.Schema({
     }
 })
 
-review_schema.index({user_id:1, movie_name:1, theatre_name:1}, {unique: true})
-
+review_schema.index({user_id:1, movie_id:1}, {unique: true})
 module.exports = mongoose.model('Review_Collection', review_schema)
