@@ -12,11 +12,14 @@ const getAllReviews = async (req, res) => {
     if(!user_id){
         server_response["status_code"] = 400 
         server_response["message"] = "Insufficient details for all reviews retrival. Provide User_id"
-        // logger.warn("Retrive all review request declined, Insufficient review details")
+        // logger.warn("Retrive all review request declined, Insufficient details")
         return res.json(server_response)
-    }
+    }   
     try{
-        const all_reviews = await review_schema.find({"user_id": user_id})
+        const all_reviews = await review_schema.find(
+            {"user_id": user_id},
+            {"user_id":0, "__v":0}
+        )
         if (all_reviews[0]){
             server_response["status_code"] = 200
             server_response["message"] = "All Reviews data retrival successful"
@@ -25,13 +28,19 @@ const getAllReviews = async (req, res) => {
             return res.json(server_response)
         }
         else{
-            console.log("ERROR:", all_reviews)
+            server_response["status_code"] = 404
+            server_response["message"] = "User has not reviewed any movie yet"
+            // logger.warn(`All Reviews data retrival failed for user ${user_id} with 0 reviews`
+            return res.json(server_response)        
         }
     }
     catch(err){
-        console.log("ERROR:", err)
+        server_response["status_code"] = 500
+        server_response["message"] = "Internal Server Error"
+        console.log(err)
+        // logger.error("DB connection failed, unable to fulfill user request", err)
+        return res.json(server_response)
     }
-    res.json({"message": "getAll"})
 }
 
 // request DELETE 
