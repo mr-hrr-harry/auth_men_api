@@ -77,8 +77,8 @@ const getOneReview = async(req, res) => {
         }
         else{
             server_response["status_code"] = 404
-            server_response["message"] = "Review not exists for provided Review id"
-            // logger.warn(`Nonexistent review request by USER_ID: ${user_id} -> REVIEW_ID: ${review_id}`)
+            server_response["message"] = "Provided Review id doesnot exist for review retrival"
+            // logger.warn(`Nonexistent review retrival request by USER_ID: ${user_id} -> REVIEW_ID: ${review_id}`)
             return res.json(server_response)
         }   
     }
@@ -145,8 +145,39 @@ const updateReview = (req, res) => {
 
 //request DELETE
 // delete one particular review
-const removeReview = (req, res) => {
-    res.json({"message": "delone"})
+const removeReview = async (req, res) => {
+    server_response = {}
+    const review_id = req.query.rid
+    const user_id = req.body.user_id
+
+    if(!(user_id && review_id)){
+        server_response["status_code"] = 400 
+        server_response["message"] = "Insufficient details for review deletion. Provide Review_id & User_id"
+        // logger.warn(`Delete review request declined, Insufficient review details by user USER_ID: ${user_id}`)
+        return res.json(server_response)
+    }
+    try{
+        const deletion_status = await review_schema.deleteOne({"_id": review_id})
+        if (deletion_status["n"] == 1){
+            server_response["status_code"] = 200 
+            server_response["message"] = "Review Deletion successful"
+            // logger.info(`Review submission successful for user ${user_id}`)
+            return res.json(server_response) 
+        }
+        else{
+            server_response["status_code"] = 404
+            server_response["message"] = "Provided Review id doesnot exist for review deletion"
+            // logger.warn(`Nonexistent review deletion request by USER_ID: ${user_id} -> REVIEW_ID: ${review_id}`)
+            return res.json(server_response)
+        }
+    }
+    catch(err){
+        server_response["status_code"] = 500
+        server_response["message"] = "Internal Server Error"
+        // logger.error("Unhandled MongoDB error occured during review submission", err)
+        console.log("ERROR:", err)
+        return res.json(server_response)
+    }
 }
 
 module.exports = {getAllReviews, removeAllReviews, getOneReview, postReview, updateReview, removeReview} 
