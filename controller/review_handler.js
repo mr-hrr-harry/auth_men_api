@@ -45,11 +45,41 @@ const getAllReviews = async (req, res) => {
 
 // request DELETE 
 // delete all submitted reviews
-const removeAllReviews = (req, res) => {
-    res.json({"message": "delAll"})
+const removeAllReviews = async (req, res) => {
+    server_response = {}
+    const user_id = req.body.user_id
+
+    if(!user_id){
+        server_response["status_code"] = 400 
+        server_response["message"] = "Insufficient details for all reviews deletion. Provide User_id"
+        // logger.warn("Delete all review request declined, Insufficient details")
+        return res.json(server_response)
+    }   
+    try{
+        const deletion_status = await review_schema.deleteMany({"user_id": user_id})
+        if (deletion_status["n"] != 0){
+            server_response["status_code"] = 200
+            server_response["message"] = "All Reviews data deleted successfully"
+            // logger.info(`All Reviews data deletion successful for USER_ID: ${user_id} -> REVIEW_ID: ${review_id}`
+            return res.json(server_response)
+        }
+        else{
+            server_response["status_code"] = 404
+            server_response["message"] = "User has not reviewed any movie yet"
+            // logger.warn(`All Reviews data retrival failed for user ${user_id} with 0 reviews`
+            return res.json(server_response)        
+        }
+    }
+    catch (err){
+        server_response["status_code"] = 500
+        server_response["message"] = "Internal Server Error"
+        // logger.error("Unhandled MongoDB error occured during review submission", err)
+        console.log("ERROR:", err)
+        return res.json(server_response)
+    }
 }
 
-// request GET
+// request GET  
 // get one particular review
 const getOneReview = async(req, res) => {
     server_response = {}
@@ -158,7 +188,7 @@ const removeReview = async (req, res) => {
     }
     try{
         const deletion_status = await review_schema.deleteOne({"_id": review_id})
-        if (deletion_status["n"] == 1){
+        if (deletion_status["n"] != 0){
             server_response["status_code"] = 200 
             server_response["message"] = "Review Deletion successful"
             // logger.info(`Review submission successful for user ${user_id}`)
