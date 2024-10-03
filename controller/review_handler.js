@@ -1,10 +1,8 @@
-const { response } = require('express')
-
 mongo_conn = require('../database/mongodb/mongodb_conn')
 review_schema = require('../database/mongodb/schema')
 
 // request GET 
-// view all submitted reviews
+// view all submitted reviews   
 const getAllReviews = async (req, res) => {
     server_response = {}
     const user_id = req.body.user_id
@@ -37,7 +35,6 @@ const getAllReviews = async (req, res) => {
     catch(err){
         server_response["status_code"] = 500
         server_response["message"] = "Internal Server Error"
-        console.log(err)
         // logger.error("DB connection failed, unable to fulfill user request", err)
         return res.json(server_response)
     }
@@ -74,7 +71,6 @@ const removeAllReviews = async (req, res) => {
         server_response["status_code"] = 500
         server_response["message"] = "Internal Server Error"
         // logger.error("Unhandled MongoDB error occured during review submission", err)
-        console.log("ERROR:", err)
         return res.json(server_response)
     }
 }
@@ -116,13 +112,12 @@ const getOneReview = async(req, res) => {
         if (err.name === "CastError"){
             server_response["status_code"] = 400
             server_response["message"] = "Check for the correctness of length of the Review id"
-            // logger.warn(`Invalid review_id length(${review_id.length}/24): ${review_id} requested by user_id: ${user_id}`)
+            // logger.warn(`Invalid review_id length(${review_id.length}/24): ${review_id} requested by user_id: ${user_id} for retrival`)
             return res.json(server_response)
         }
         else{
             server_response["status_code"] = 500
             server_response["message"] = "Internal Server Error"
-            console.log(err)
             // logger.error("DB connection failed, unable to fulfill user request", err)
             return res.json(server_response)
         }
@@ -137,7 +132,7 @@ const postReview = async (req, res) => {
 
     if(!(user_id && movie_id && theatre_name && overall_rating)){
         server_response["status_code"] = 400 
-        server_response["message"] = "Insufficient details for review submission. Provide Movie name, Theatre name & Rating atleast"
+        server_response["message"] = "Insufficient details for review submission. Provide Movie_id, Theatre name & Rating atleast"
         // logger.warn("Submit review request declined, Insufficient review submission details")
         return res.json(server_response)
     }
@@ -167,10 +162,65 @@ const postReview = async (req, res) => {
     }
 }
 
-//request PUT
+//request PATCH
 // edit one particular review
-const updateReview = (req, res) => {
-    res.json({"message": "updateOne"})  
+const updateReview = async (req, res) => {
+    server_response = {}
+    const user_id = req.body.user_id
+    const review_id = req.body.review_id
+    delete req.body["user_id"]
+    delete req.body["review_id"]
+    
+    if(!(user_id && review_id)){
+        server_response["status_code"] = 400 
+        server_response["message"] = "Insufficient details for review updation. Provide User_id & Review_id for updation"
+        // logger.warn("Update review request declined, Insufficient review submission details")
+        return res.json(server_response)
+    }
+    if(!(Object.keys(req.body)[0])){
+        server_response["status_code"] = 400 
+        server_response["message"] = "Empty update request. Update atleast one of the fields"
+        // logger.warn("Empty update request declined for USER_ID: ${user_id} -> REVIEW_ID: ${review_id}")
+        return res.json(server_response)
+    }
+    try{
+        const updated_review =  await review_schema.findOneAndUpdate(
+            {"_id": review_id}, req.body, {new: true}
+        ).select('-_id -user_id -__v')
+        if(!(updated_review)){
+            server_response["status_code"] = 400 
+            server_response["message"] = "Invalid Review ID. Check for the correctness of review_id"
+            // logger.warn("Empty update request declined for USER_ID: ${user_id} -> REVIEW_ID: ${review_id}")
+            return res.json(server_response)
+        }
+        else{
+            server_response["status_code"] = 200
+            server_response["message"] = "Review Upadtion successful"
+            server_response["updated_data"] = updated_review
+            // logger.info(`Review data updation successful for USER_ID: ${user_id} -> REVIEW_ID: ${review_id}`
+            return res.json(server_response)
+        }
+    }
+    catch (err){
+        if (err.code === 11000){
+            server_response["status_code"] = 409
+            server_response["message"] = "You have reviewed this movie already"
+           // logger.warn("Review updation failed for user ${user_id}")
+            return res.json(server_response)
+        }
+        else if(err.name==="CastError") {
+            server_response["status_code"] = 409
+            server_response["message"] = "Check for the correctness of length of the Review id"
+            // logger.warn(`Invalid review_id length(${review_id.length}/24): ${review_id} requested by user_id: ${user_id} for updation`)
+            return res.json(server_response)
+        }
+        else{
+            server_response["status_code"] = 500
+            server_response["message"] = "Internal Server Error"
+            // logger.error("Unhandled MongoDB error occured during review submission", err)
+            return res.json(server_response)
+        }
+    }
 }
 
 //request DELETE
@@ -202,11 +252,18 @@ const removeReview = async (req, res) => {
         }
     }
     catch(err){
-        server_response["status_code"] = 500
-        server_response["message"] = "Internal Server Error"
-        // logger.error("Unhandled MongoDB error occured during review submission", err)
-        console.log("ERROR:", err)
-        return res.json(server_response)
+        if(err.name==="CastError") {
+            server_response["status_code"] = 409
+            server_response["message"] = "Check for the correctness of length of the Review id"
+            // logger.warn(`Invalid review_id length(${review_id.length}/24): ${review_id} requested by user_id: ${user_id} for deletion`)
+            return res.json(server_response)
+        }
+        else{
+            server_response["status_code"] = 500
+            server_response["message"] = "Internal Server Error"
+            // logger.error("Unhandled MongoDB error occured during review submission", err)
+            return res.json(server_response)
+        }
     }
 }
 

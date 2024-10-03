@@ -5,6 +5,6 @@ const {getAllReviews, removeAllReviews, getOneReview, postReview, updateReview, 
 
 router.route('/user').get(getAllReviews).delete(removeAllReviews)
 router.route('/submit').post(postReview)
-router.route('/review').get(getOneReview).put(updateReview).delete(removeReview)
+router.route('/review').get(getOneReview).patch(updateReview).delete(removeReview)
 
 module.exports = router

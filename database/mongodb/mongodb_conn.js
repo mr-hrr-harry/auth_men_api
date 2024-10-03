@@ -7,6 +7,7 @@ mongoose.connect(mongodb_url, {
     useNewUrlParser: true,
     useUnifiedTopology:true,
     useCreateIndex: true,
+    useFindAndModify: false,
 })
 
 mongo_conn = mongoose.connection
