@@ -13,11 +13,9 @@ mongoose.connect(mongodb_url, {
 mongo_conn = mongoose.connection
 
 mongo_conn.on('open', () => {
-    console.log("MongoDB connected successfully...")
-    // logger.log("MongoDB connection established successfully")
+    logger.info("MongoDB connection established successfully")
 }).on('error', (err) => {
-    console.log("Error reaching Mongodb", err)
-    // logger.error("Error reaching Mongodb", err)
+    logger.error("Error reaching Mongodb", err)
 })
 
 module.exports = mongo_conn

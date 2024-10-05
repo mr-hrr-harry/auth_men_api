@@ -15,7 +15,7 @@ const userSignIn = async (req, res) => {
         catch (err){
             server_response["status_code"] = 500
             server_response["message"] = "Internal Server Error"
-            // logger.error("DB connection failed, unable to fulfill user request")
+            logger.error("DB connection failed, unable to fulfill user request")
             return res.json(server_response)
         }
         
@@ -23,20 +23,20 @@ const userSignIn = async (req, res) => {
             server_response["status_code"] = 200
             server_response["message"] = "Authentication successful"
             server_response["data"] = data[0]
-            // logger.info(`Authentication successful for user with email ${user_email}`)
+            logger.info(`Authentication successful for user with email ${user_email}`)
             return res.json(server_response)
         }
         else{
             server_response["status_code"] = 401
             server_response["message"] = "Authentication failed, User with provided credentials not found!"
-            // logger.error(`Authentication failed for user with email ${user_email}`)
+            logger.error(`Authentication failed for user with email ${user_email}`)
             return res.json(server_response)
         }
     }
     else{
         server_response["status_code"] = 500
         server_response["message"] = "Internal Server Error"
-        // logger.error("DB connection failed, unable to fulfill user request")
+        logger.error("DB connection failed, unable to fulfill user request")
         return res.json(server_response)
     }
 }
@@ -58,7 +58,7 @@ const userSignUp = async (req, res) => {
         if(!(user_name && user_email && user_password)){
             server_response["status_code"] = 400 
             server_response["message"] = "Insufficient details for user creation"
-            // logger.warn("User creation request declined, Insufficient user creation details")
+            logger.warn("User creation request declined, Insufficient user creation details")
             return res.json(server_response)
         }
         try{
@@ -67,14 +67,14 @@ const userSignUp = async (req, res) => {
         catch (err){
             server_response["status_code"] = 500
             server_response["message"] = "Internal Server Error"
-            // logger.error("DB connection failed, unable to fulfill user request")
+            logger.error("DB connection failed, unable to fulfill user request")
             return res.json(server_response)
         }
 
         if (data[0]){
             server_response["status_code"] = 409 // 409: conflict
             server_response["message"] = "Email ID logged in already"
-            // logger.warn("User creation request declined, Email ID logged in already")
+            logger.warn("User creation request declined, Email ID logged in already")
             return res.json(server_response)
         }
         else{
@@ -87,10 +87,10 @@ const userSignUp = async (req, res) => {
                 catch (err){
                     server_response["status_code"] = 500
                     server_response["message"] = "Internal Server Error"
-                    // logger.error("DB connection failed, unable to fulfill user request")
+                    logger.error("DB connection failed, unable to fulfill user request")
                     return res.json(server_response)
                 }
-                // logger.info("User ID creation attempt: ", attempt++)
+                logger.info("User ID creation attempt: ", attempt++)
             } while(data[0]);
 
             try{
@@ -99,20 +99,20 @@ const userSignUp = async (req, res) => {
             catch (err){
                 server_response["status_code"] = 500
                 server_response["message"] = "Internal Server Error"
-                // logger.error("DB connection failed, unable to fulfill user request")
+                logger.error("DB connection failed, unable to fulfill user request")
                 return res.json(server_response)
             }
             server_response["status_code"] = 200
             server_response["message"] = "New user created successfully"
             server_response["data"] = {"server_uid": generated_uid}
-            // logger.info(`User creation successful with email ${user_email}`)
+            logger.info(`User creation successful with email ${user_email}`)
             return res.json(server_response)
         }
     }
     else{
         server_response["status_code"] = 500
         server_response["message"] = "Internal Server Error"
-        // logger.error("DB connection failed, unable to fulfill user request")
+        logger.error("DB connection failed, unable to fulfill user request")
         return res.json(server_response)
     }
 }
