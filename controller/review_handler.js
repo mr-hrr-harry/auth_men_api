@@ -92,14 +92,24 @@ const getOneReview = async(req, res) => {
     try{
         const user_review = await review_schema.findOne(
             {"_id": review_id},
-            {"_id":0, "__v":0, "user_id":0}
+            {"_id":0, "__v":0}
         )
         if (user_review){
-            server_response["status_code"] = 200
-            server_response["message"] = "Review data retrival successful"
-            server_response["data"] = user_review
-            logger.info(`Review data retrival successful for USER_ID: ${user_id} -> REVIEW_ID: ${review_id}`)
-            return res.json(server_response)
+            retrived_uid = user_review["user_id"]
+            delete user_review["user_id"]
+            if(retrived_uid === user_id){
+                server_response["status_code"] = 200
+                server_response["message"] = "Review data retrival successful"
+                server_response["data"] = user_review
+                logger.info(`Review data retrival successful for USER_ID: ${user_id} -> REVIEW_ID: ${review_id}`)
+                return res.json(server_response)
+            }
+            else{
+                server_response["status_code"] = 400 
+                server_response["message"] = "User not associated with the provied the Review id"
+                logger.warn(`USER_ID: ${user_id} not associated with the provied the REVIEW_ID: ${review_id}, suspicious GET request declined`)
+                return res.json(server_response)
+            }
         }
         else{
             server_response["status_code"] = 404
@@ -162,6 +172,14 @@ const postReview = async (req, res) => {
     }
 }
 
+// const isInvalidUser = async (review_id, request_uid) => {
+//     const retrived_uid = await review_schema.findOne(
+//         {"_id": review_id}
+//     )
+//     console.log("UIDs:", request_uid, retrived_uid)
+//     return false
+// }
+
 //request PATCH
 // edit one particular review
 const updateReview = async (req, res) => {
@@ -187,6 +205,7 @@ const updateReview = async (req, res) => {
         const updated_review =  await review_schema.findOneAndUpdate(
             {"_id": review_id}, req.body, {new: true}
         ).select('-_id -user_id -__v')
+        
         if(!(updated_review)){
             server_response["status_code"] = 400 
             server_response["message"] = "Invalid Review ID. Check for the correctness of review_id"
